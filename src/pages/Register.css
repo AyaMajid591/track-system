@@ -1,0 +1,82 @@
+html,
+body,
+#root {
+  width: 100%;
+  min-height: 100%;
+  margin: 0;
+}
+
+.login-page {
+  min-height: 100vh;
+  width: 100%;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  padding: 24px;
+  background: #09051a;
+}
+
+.login-page::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: url("/mantis.jpg");
+  background-repeat: no-repeat;
+  background-position: center 70%;
+  background-size: 120%;
+  filter: blur(2.5px) brightness(0.38);
+  transform: scale(1.2) translateY(-40px);
+  animation: bgFloat 12s ease-in-out infinite;
+}
+
+.login-page::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(180deg, rgba(5, 3, 20, 0.72), rgba(10, 6, 30, 0.90)),
+    radial-gradient(circle at center, rgba(168, 85, 247, 0.14), transparent 55%);
+}
+
+.login-card {
+  position: relative;
+  z-index: 2;
+  width: 460px;
+  max-width: calc(100vw - 32px);
+  padding: 36px;
+  border-radius: 28px;
+  background: rgba(20, 13, 50, 0.84);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow:
+    0 0 30px rgba(168, 85, 247, 0.18),
+    0 24px 60px rgba(0, 0, 0, 0.45);
+  backdrop-filter: blur(16px);
+  color: white;
+  animation: cardFloat 4s ease-in-out infinite;
+}
+
+@keyframes bgFloat {
+  0% {
+    transform: scale(1.2) translateY(-40px) translateX(0px);
+  }
+  50% {
+    transform: scale(1.23) translateY(-48px) translateX(6px);
+  }
+  100% {
+    transform: scale(1.2) translateY(-40px) translateX(0px);
+  }
+}
+
+@keyframes cardFloat {
+  0% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-6px);
+  }
+  100% {
+    transform: translateY(0px);
+  }
+}

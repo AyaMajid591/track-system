@@ -36,3 +36,46 @@
     transform: rotate(360deg);
   }
 }
+
+.container {
+  padding: 30px;
+}
+
+/* glass card */
+.card {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 20px;
+  padding: 20px;
+  backdrop-filter: blur(15px);
+  border: 1px solid rgba(255,255,255,0.1);
+
+  /* 🔥 glow */
+  box-shadow: 0 0 20px rgba(168, 85, 247, 0.4);
+}
+
+/* buttons */
+.btn {
+  background: linear-gradient(90deg, #9333EA, #EC4899);
+  border: none;
+  padding: 12px;
+  border-radius: 12px;
+  color: white;
+  font-weight: 600;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.btn:hover {
+  transform: scale(1.05);
+  box-shadow: 0 0 15px #9333EA;
+}
+
+/* inputs */
+.input {
+  width: 100%;
+  padding: 12px;
+  border-radius: 10px;
+  border: none;
+  margin-bottom: 10px;
+  outline: none;
+}
