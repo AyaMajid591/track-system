@@ -1,6 +1,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { apiRequest } from "../authService";
+import useResponsive from "../hooks/useResponsive";
 
 const categories = [
   "All",
@@ -24,6 +25,7 @@ const formatMoney = (value) =>
   });
 
 function Transactions() {
+  const { isMobile, isLargeMobile, isTablet, isPhone } = useResponsive();
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [searchTerm, setSearchTerm] = useState("");
   const [transactions, setTransactions] = useState([]);
@@ -58,7 +60,7 @@ function Transactions() {
     background:
       "radial-gradient(circle at 20% 0%, rgba(168,85,247,0.42), transparent 35%), radial-gradient(circle at 85% 15%, rgba(236,72,153,0.28), transparent 35%), #0b1026",
     color: "white",
-    padding: "28px 32px",
+    padding: isMobile ? "16px 12px" : isLargeMobile ? "20px 14px" : isTablet ? "22px 18px" : "28px 32px",
     fontFamily: "Poppins, sans-serif",
   };
 
@@ -217,12 +219,12 @@ function Transactions() {
               <button style={topButton} onClick={() => setEditingTransaction(null)}>Close</button>
             </div>
 
-            <div style={{ display: "flex", gap: "10px", marginBottom: "14px" }}>
+            <div style={{ display: "grid", gridTemplateColumns: isPhone ? "1fr" : "1fr 1fr", gap: "10px", marginBottom: "14px" }}>
               <button style={{ ...topButton, flex: 1, background: editingTransaction.transaction_type === "expense" ? "linear-gradient(90deg, #fb7185, #fda4af)" : "rgba(255,255,255,0.08)" }} onClick={() => handleChange("transaction_type", "expense")}>Expense</button>
               <button style={{ ...topButton, flex: 1, background: editingTransaction.transaction_type === "income" ? "linear-gradient(90deg, #4ade80, #86efac)" : "rgba(255,255,255,0.08)", color: editingTransaction.transaction_type === "income" ? "#08110a" : "white" }} onClick={() => handleChange("transaction_type", "income")}>Income</button>
             </div>
 
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "14px", marginBottom: "14px" }}>
+            <div style={{ display: "grid", gridTemplateColumns: isPhone ? "1fr" : "1fr 1fr", gap: "14px", marginBottom: "14px" }}>
               <input style={modalInput} placeholder="Title" value={editingTransaction.title} onChange={(e) => handleChange("title", e.target.value)} />
               <input style={modalInput} placeholder="Amount" type="number" value={editingTransaction.amount} onChange={(e) => handleChange("amount", e.target.value)} />
               <select style={modalInput} value={editingTransaction.account_id || ""} onChange={(e) => handleChange("account_id", e.target.value)}>
@@ -251,15 +253,15 @@ function Transactions() {
       )}
 
       <div style={{ maxWidth: "1400px", margin: "0 auto" }}>
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "18px", gap: "14px", flexWrap: "wrap" }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: isPhone ? "stretch" : "center", flexDirection: isPhone ? "column" : "row", marginBottom: "18px", gap: "14px", flexWrap: "wrap" }}>
           <div>
             <div style={{ fontSize: "34px", fontWeight: "800" }}>Transactions</div>
             <div style={{ opacity: 0.7, marginTop: "4px" }}>Real database transactions</div>
           </div>
 
-          <div style={{ display: "flex", gap: "12px", alignItems: "center" }}>
-            <input style={{ width: "240px", background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.12)", borderRadius: "8px", color: "white", padding: "12px 14px", outline: "none" }} placeholder="Search..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
-            <button style={topButton} onClick={openCreateModal}>+ New Transaction</button>
+          <div style={{ display: "flex", gap: "12px", alignItems: "center", width: isPhone ? "100%" : "auto", flexDirection: isMobile ? "column" : "row" }}>
+            <input style={{ width: isPhone ? "100%" : "240px", background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.12)", borderRadius: "8px", color: "white", padding: "12px 14px", outline: "none" }} placeholder="Search..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
+            <button style={{ ...topButton, width: isMobile ? "100%" : "auto" }} onClick={openCreateModal}>+ New Transaction</button>
           </div>
         </div>
 
@@ -268,7 +270,7 @@ function Transactions() {
 
         {!loading && (
           <>
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "16px", marginBottom: "18px" }}>
+            <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : isLargeMobile ? "1fr" : isTablet ? "repeat(2, 1fr)" : "repeat(3, 1fr)", gap: "16px", marginBottom: "18px" }}>
               <div style={{ ...glassCard, padding: "20px" }}>
                 <div style={{ opacity: 0.7 }}>Total Income</div>
                 <div style={{ marginTop: "8px", fontSize: "20px", fontWeight: 800, color: "#86efac" }}>{formatMoney(totalIncome)}</div>
@@ -291,8 +293,31 @@ function Transactions() {
               ))}
             </div>
 
-            <div style={{ ...glassCard, padding: "18px", overflowX: "auto" }}>
-              <div style={{ minWidth: "880px" }}>
+            <div style={{ ...glassCard, padding: "18px", overflowX: isPhone ? "visible" : "auto" }}>
+              {isPhone ? (
+                <div style={{ display: "grid", gap: "12px" }}>
+                  {filteredTransactions.length === 0 && <div style={{ padding: "18px", opacity: 0.75 }}>No transactions found.</div>}
+                  {filteredTransactions.map((item) => (
+                    <div key={item.id} style={{ padding: "16px", borderRadius: "16px", background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.06)" }}>
+                      <div style={{ fontWeight: 800, marginBottom: "6px" }}>{item.title}</div>
+                      <div style={{ fontSize: "13px", opacity: 0.72, marginBottom: "10px" }}>{item.note || item.category}</div>
+                      <div style={{ display: "grid", gap: "6px", fontSize: "14px" }}>
+                        <div>Category: {item.category}</div>
+                        <div>Account: {item.account_name || "No account"}</div>
+                        <div>Date: {item.date?.slice(0, 10)}</div>
+                        <div style={{ fontWeight: 800, color: item.type === "income" ? "#86efac" : "#fda4af" }}>
+                          Amount: {item.type === "income" ? "+" : "-"}{formatMoney(item.amount)}
+                        </div>
+                      </div>
+                      <div style={{ display: "flex", gap: "8px", marginTop: "12px", flexWrap: "wrap" }}>
+                        <button style={chipStyle(false)} onClick={() => openEditModal(item)}>Edit</button>
+                        <button style={chipStyle(false)} onClick={() => deleteTransaction(item.id)}>Delete</button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+              <div style={{ minWidth: isTablet ? "720px" : "880px" }}>
                 <div style={{ display: "grid", gridTemplateColumns: "2fr 1fr 1fr 1fr 1fr 120px", gap: "12px", opacity: 0.65, fontSize: "12px", padding: "0 12px 10px" }}>
                   <div>Title</div>
                   <div>Category</div>
@@ -322,6 +347,7 @@ function Transactions() {
                   </div>
                 ))}
               </div>
+              )}
             </div>
           </>
         )}

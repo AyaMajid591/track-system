@@ -1,9 +1,11 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { apiRequest } from "../authService";
+import useResponsive from "../hooks/useResponsive";
 
 function Budgets() {
   const navigate = useNavigate();
+  const { isMobile, isLargeMobile, isTablet, isPhone } = useResponsive();
   const [budgets, setBudgets] = useState([]);
   const [category, setCategory] = useState("Food");
   const [limitAmount, setLimitAmount] = useState("");
@@ -125,7 +127,7 @@ function Budgets() {
 
   return (
     <>
-      <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "20px" }}>
+      <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "20px", flexWrap: "wrap", gap: "12px" }}>
         <div>
           <div style={{ fontSize: "28px", fontWeight: "800" }}>Budgets</div>
           <div style={{ opacity: 0.6 }}>Budget usage calculated from expense transactions</div>
@@ -134,17 +136,17 @@ function Budgets() {
 
       {error && <div style={{ ...card, color: "#fda4af", marginBottom: 18 }}>{error}</div>}
 
-      <form onSubmit={addBudget} style={{ ...card, marginBottom: 20, display: "grid", gridTemplateColumns: "1fr 1fr auto", gap: 12 }}>
+      <form onSubmit={addBudget} style={{ ...card, marginBottom: 20, display: "grid", gridTemplateColumns: isPhone ? "1fr" : "1fr 1fr auto", gap: 12 }}>
         <select style={input} value={category} onChange={(e) => setCategory(e.target.value)}>
           {["Food", "Transport", "Shopping", "Bills", "Health", "Entertainment", "Salary", "Investment", "Savings", "Other"].map((item) => (
             <option key={item}>{item}</option>
           ))}
         </select>
         <input style={input} placeholder="Monthly limit" type="number" value={limitAmount} onChange={(e) => setLimitAmount(e.target.value)} />
-        <button style={button}>Add Budget</button>
+        <button style={{ ...button, width: isPhone ? "100%" : "auto" }}>Add Budget</button>
       </form>
 
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "18px" }}>
+      <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : isLargeMobile ? "1fr" : isTablet ? "repeat(2, 1fr)" : "repeat(3, 1fr)", gap: "18px" }}>
         {budgets.length === 0 && <div style={{ ...card, opacity: 0.75 }}>No budgets yet. Add one above.</div>}
         {budgets.map((item) => (
           <BudgetCard key={item.id} item={item} />

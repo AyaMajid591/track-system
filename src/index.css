@@ -17,6 +17,14 @@ body {
   overflow-x: hidden;
 }
 
+#root {
+  overflow-x: hidden;
+}
+
+* {
+  min-width: 0;
+}
+
 button,
 input,
 select,

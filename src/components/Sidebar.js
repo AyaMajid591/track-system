@@ -2,10 +2,13 @@ import { useEffect, useState } from "react";
 import { NavLink } from "react-router-dom";
 import { apiRequest, getCurrentUser, isLoggedIn } from "../authService";
 
-function Sidebar() {
+function Sidebar({ compact = false, mobile = false, isOpen = true, onClose }) {
   const [user, setUser] = useState(() => getCurrentUser());
 
   const wrapper = {
+    width: compact ? "96px" : "280px",
+    minWidth: compact ? "96px" : "280px",
+    height: "100%",
     padding: "22px 18px",
     borderRight: "1px solid rgba(255,255,255,0.06)",
     background: "rgba(7, 5, 20, 0.55)",
@@ -13,6 +16,13 @@ function Sidebar() {
     display: "flex",
     flexDirection: "column",
     justifyContent: "space-between",
+    position: mobile ? "fixed" : "relative",
+    top: 0,
+    left: 0,
+    zIndex: mobile ? 50 : "auto",
+    transform: mobile ? (isOpen ? "translateX(0)" : "translateX(-100%)") : "none",
+    transition: "transform 0.25s ease",
+    boxShadow: mobile ? "0 20px 60px rgba(0,0,0,0.45)" : "none",
   };
 
   const brandCard = {
@@ -38,7 +48,8 @@ function Sidebar() {
   const getLinkStyle = ({ isActive }) => ({
     display: "flex",
     alignItems: "center",
-    gap: "12px",
+    justifyContent: compact ? "center" : "flex-start",
+    gap: compact ? "0" : "12px",
     padding: "14px 16px",
     borderRadius: "16px",
     marginBottom: "10px",
@@ -62,7 +73,8 @@ function Sidebar() {
     padding: "14px",
     display: "flex",
     alignItems: "center",
-    gap: "12px",
+    gap: compact ? "0" : "12px",
+    justifyContent: compact ? "center" : "flex-start",
   };
 
   const avatar = {
@@ -147,19 +159,23 @@ function Sidebar() {
             💎
           </div>
 
-          <div style={{ fontSize: "30px", fontWeight: 800, lineHeight: 1 }}>
-            Track
-          </div>
-          <div style={{ fontSize: "15px", opacity: 0.8, marginTop: "6px" }}>
-            Smart Finance Manager
-          </div>
+          {!compact && (
+            <>
+              <div style={{ fontSize: "30px", fontWeight: 800, lineHeight: 1 }}>
+                Track
+              </div>
+              <div style={{ fontSize: "15px", opacity: 0.8, marginTop: "6px" }}>
+                Smart Finance Manager
+              </div>
+            </>
+          )}
         </div>
 
         <nav>
           {menu.map((item) => (
-            <NavLink key={item.path} to={item.path} style={getLinkStyle}>
+            <NavLink key={item.path} to={item.path} style={getLinkStyle} onClick={mobile ? onClose : undefined}>
               <span style={{ width: "18px", textAlign: "center" }}>{item.icon}</span>
-              <span>{item.label}</span>
+              {!compact && <span>{item.label}</span>}
             </NavLink>
           ))}
         </nav>
@@ -167,10 +183,12 @@ function Sidebar() {
 
       <div style={userBox}>
         <div style={avatar}>{avatarLabel}</div>
-        <div>
-          <div style={{ fontWeight: 700 }}>{displayName}</div>
-          <div style={{ fontSize: "13px", opacity: 0.7 }}>{planLabel}</div>
-        </div>
+        {!compact && (
+          <div>
+            <div style={{ fontWeight: 700 }}>{displayName}</div>
+            <div style={{ fontSize: "13px", opacity: 0.7 }}>{planLabel}</div>
+          </div>
+        )}
       </div>
     </aside>
   );

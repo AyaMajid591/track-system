@@ -11,6 +11,7 @@ import {
   XAxis,
 } from "recharts";
 import { apiRequest } from "../authService";
+import useResponsive from "../hooks/useResponsive";
 
 const formatMoney = (value) =>
   "MYR " +
@@ -21,6 +22,7 @@ const formatMoney = (value) =>
 
 function Dashboard() {
   const navigate = useNavigate();
+  const { isMobile, isLargeMobile, isTablet, isPhone } = useResponsive();
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -61,7 +63,7 @@ function Dashboard() {
     background:
       "radial-gradient(circle at 20% 0%, rgba(168,85,247,0.5), transparent 40%), radial-gradient(circle at 80% 20%, rgba(236,72,153,0.4), transparent 40%), #0b1026",
     color: "white",
-    padding: "28px 32px",
+    padding: isMobile ? "16px 12px" : isLargeMobile ? "20px 14px" : isTablet ? "22px 18px" : "28px 32px",
     fontFamily: "Poppins, sans-serif",
   };
 
@@ -157,7 +159,7 @@ function Dashboard() {
             Track System
           </div>
 
-          <h1 style={{ fontSize: "46px", lineHeight: 1.05, margin: 0, fontWeight: 800 }}>
+          <h1 style={{ fontSize: isMobile ? "32px" : isLargeMobile ? "36px" : "46px", lineHeight: 1.05, margin: 0, fontWeight: 800 }}>
             Financial Dashboard
           </h1>
           <p style={{ maxWidth: "720px", opacity: 0.82, lineHeight: 1.7 }}>
@@ -169,17 +171,17 @@ function Dashboard() {
         {error && <div style={{ ...glassBig, padding: "22px", color: "#fda4af" }}>{error}</div>}
 
         {data && (
-          <div style={{ display: "grid", gridTemplateColumns: "1.15fr 0.85fr", gap: "20px" }}>
+          <div style={{ display: "grid", gridTemplateColumns: isPhone ? "1fr" : isTablet ? "1fr" : "1.15fr 0.85fr", gap: "20px" }}>
             <div>
               <div style={{ ...glassBig, padding: "22px", marginBottom: "20px" }}>
                 <div style={{ fontSize: "13px", opacity: 0.78, marginBottom: "10px" }}>
                   OVERALL BALANCE
                 </div>
-                <div style={{ fontSize: "44px", fontWeight: 800, marginBottom: "18px" }}>
+                <div style={{ fontSize: isPhone ? "32px" : "44px", fontWeight: 800, marginBottom: "18px" }}>
                   {formatMoney(data.summary.total_balance)}
                 </div>
 
-                <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "16px" }}>
+                <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : isLargeMobile ? "1fr" : "repeat(3, 1fr)", gap: "16px" }}>
                   <div style={statCard}>
                     <div style={{ opacity: 0.7, fontSize: "13px", marginBottom: "10px" }}>Income</div>
                     <div style={{ fontSize: "24px", fontWeight: 800, color: "#4ade80" }}>
@@ -219,7 +221,7 @@ function Dashboard() {
                 </div>
               </div>
 
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "20px" }}>
+              <div style={{ display: "grid", gridTemplateColumns: isPhone ? "1fr" : "1fr 1fr", gap: "20px" }}>
                 <div style={{ ...glassBig, padding: "22px" }}>
                   <div style={{ fontSize: "13px", opacity: 0.78, marginBottom: "14px" }}>ACCOUNTS</div>
                   {data.accounts.map((account, index) => (
@@ -254,7 +256,7 @@ function Dashboard() {
             <div>
               <div style={{ ...glassBig, padding: "22px", marginBottom: "20px" }}>
                 <div style={{ fontSize: "13px", opacity: 0.78, marginBottom: "14px" }}>QUICK ACTIONS</div>
-                <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: "14px" }}>
+                <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "repeat(2, 1fr)", gap: "14px" }}>
                   <div style={quickButton("linear-gradient(180deg, rgba(59,130,246,0.22), rgba(17,24,67,0.88))")} onClick={() => navigate("/transactions")}>
                     <div style={{ fontSize: "24px", marginBottom: "8px" }}>+</div>
                     Add Transaction
@@ -275,21 +277,21 @@ function Dashboard() {
               </div>
 
               <div style={{ ...glassBig, padding: "22px" }}>
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "14px" }}>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: isMobile ? "stretch" : "center", flexDirection: isMobile ? "column" : "row", gap: "12px", marginBottom: "14px" }}>
                   <div style={{ fontSize: "13px", opacity: 0.78 }}>RECENT TRANSACTIONS</div>
                   <button style={navButton} onClick={() => navigate("/transactions")}>View all</button>
                 </div>
 
                 {data.recentTransactions.length === 0 && <div style={{ opacity: 0.75 }}>No transactions yet.</div>}
                 {data.recentTransactions.map((item) => (
-                  <div key={item.id} style={transactionRow}>
+                  <div key={item.id} style={{ ...transactionRow, flexDirection: isMobile ? "column" : "row", alignItems: isMobile ? "flex-start" : "center", gap: "10px" }}>
                     <div>
                       <div style={{ fontWeight: 800 }}>{item.title}</div>
                       <div style={{ opacity: 0.72, fontSize: "13px", marginTop: "4px" }}>
                         {item.date?.slice(0, 10)} • {item.account_name || "No account"} • {item.category}
                       </div>
                     </div>
-                    <div style={{ color: item.type === "income" ? "#4ade80" : "#fb7185", fontWeight: 800 }}>
+                    <div style={{ color: item.type === "income" ? "#4ade80" : "#fb7185", fontWeight: 800, alignSelf: isMobile ? "flex-start" : "auto" }}>
                       {item.type === "income" ? "+" : "-"}{formatMoney(item.amount)}
                     </div>
                   </div>

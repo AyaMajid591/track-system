@@ -2,9 +2,11 @@ import { useNavigate } from "react-router-dom";
 import { useState } from "react";
 import AppShell from "../components/AppShell";
 import { getCurrentUser } from "../authService";
+import useResponsive from "../hooks/useResponsive";
 
 function Settings() {
   const navigate = useNavigate();
+  const { isMobile, isTablet, isPhone } = useResponsive();
   const [pressedCard, setPressedCard] = useState("");
   const user = getCurrentUser();
   const fullName = user?.name || "Track User";
@@ -72,7 +74,7 @@ function Settings() {
       <div
         style={{
           display: "grid",
-          gridTemplateColumns: "1.1fr 0.9fr",
+          gridTemplateColumns: isPhone ? "1fr" : isTablet ? "1fr" : "1.1fr 0.9fr",
           gap: "22px",
           alignItems: "start",
         }}
@@ -96,7 +98,7 @@ function Settings() {
           <div
             style={{
               display: "grid",
-              gridTemplateColumns: "1fr 1fr",
+              gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr",
               gap: "16px",
               marginBottom: "16px",
             }}
@@ -105,7 +107,7 @@ function Settings() {
               <div style={{ opacity: 0.72, fontSize: "12px", fontWeight: "800", marginBottom: "8px" }}>
                 Current Plan
               </div>
-              <div style={{ fontSize: "42px", fontWeight: "900", lineHeight: 1 }}>Pro</div>
+              <div style={{ fontSize: isMobile ? "32px" : "42px", fontWeight: "900", lineHeight: 1 }}>{user?.plan || "Free"}</div>
               <div style={{ opacity: 0.8 }}>Track Pro subscription</div>
             </div>
 
@@ -113,7 +115,7 @@ function Settings() {
               <div style={{ opacity: 0.72, fontSize: "12px", fontWeight: "800", marginBottom: "8px" }}>
                 Member Since
               </div>
-              <div style={{ fontSize: "42px", fontWeight: "900", lineHeight: 1 }}>2026</div>
+              <div style={{ fontSize: isMobile ? "32px" : "42px", fontWeight: "900", lineHeight: 1 }}>2026</div>
               <div style={{ opacity: 0.8 }}>April account</div>
             </div>
           </div>

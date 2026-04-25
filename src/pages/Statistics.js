@@ -13,6 +13,7 @@ import {
   YAxis,
 } from "recharts";
 import { apiRequest } from "../authService";
+import useResponsive from "../hooks/useResponsive";
 
 const formatMoney = (value) =>
   "MYR " +
@@ -22,6 +23,7 @@ const formatMoney = (value) =>
   });
 
 function Statistics() {
+  const { isMobile, isLargeMobile, isTablet, isPhone } = useResponsive();
   const [data, setData] = useState(null);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(true);
@@ -38,7 +40,7 @@ function Statistics() {
     background:
       "radial-gradient(circle at 20% 0%, rgba(168,85,247,0.42), transparent 35%), radial-gradient(circle at 85% 15%, rgba(236,72,153,0.28), transparent 35%), #0b1026",
     color: "white",
-    padding: "28px 32px",
+    padding: isMobile ? "16px 12px" : isLargeMobile ? "20px 14px" : isTablet ? "22px 18px" : "28px 32px",
     fontFamily: "Poppins, sans-serif",
   };
 
@@ -76,7 +78,7 @@ function Statistics() {
 
         {data && (
           <>
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: "16px", marginBottom: "18px" }}>
+            <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : isLargeMobile ? "repeat(2, 1fr)" : isTablet ? "repeat(2, 1fr)" : "repeat(4, 1fr)", gap: "16px", marginBottom: "18px" }}>
               <div style={summaryCard("rgba(74,222,128,0.35)")}>
                 <div style={{ opacity: 0.7 }}>Total Income</div>
                 <div style={{ marginTop: 8, fontSize: 20, fontWeight: 800, color: "#86efac" }}>{formatMoney(data.summary.total_income)}</div>
@@ -110,7 +112,7 @@ function Statistics() {
               </div>
             </div>
 
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "18px" }}>
+            <div style={{ display: "grid", gridTemplateColumns: isPhone ? "1fr" : "1fr 1fr", gap: "18px" }}>
               <div style={{ ...glassCard, padding: "22px" }}>
                 <div style={{ fontSize: "18px", fontWeight: "800", marginBottom: "16px" }}>Spending Breakdown</div>
                 <div style={{ height: 300 }}>

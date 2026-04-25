@@ -1,9 +1,11 @@
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
 import { apiRequest } from "../authService";
+import useResponsive from "../hooks/useResponsive";
 
 function AIAssistant() {
   const navigate = useNavigate();
+  const { isMobile, isLargeMobile, isTablet, isPhone } = useResponsive();
 
   const [messages, setMessages] = useState([
     {
@@ -44,7 +46,7 @@ function AIAssistant() {
     minHeight: "100vh",
     background: "radial-gradient(circle at top, #8b1cf7 0%, #5b21b6 20%, #1e1b4b 55%, #0b1026 100%)",
     color: "white",
-    padding: "24px",
+    padding: isMobile ? "16px 12px" : isLargeMobile ? "18px 14px" : isTablet ? "20px 16px" : "24px",
     fontFamily: "Poppins, sans-serif"
   };
 
@@ -73,7 +75,7 @@ function AIAssistant() {
       <div
         style={{
           display: "flex",
-          justifyContent: "flex-end",
+          justifyContent: isPhone ? "flex-start" : "flex-end",
           gap: "10px",
           marginBottom: "20px"
         }}
@@ -97,7 +99,7 @@ function AIAssistant() {
           maxWidth: "1200px",
           margin: "0 auto",
           display: "grid",
-          gridTemplateColumns: "300px 1fr",
+          gridTemplateColumns: isPhone ? "1fr" : isTablet ? "260px 1fr" : "300px 1fr",
           gap: "20px"
         }}
       >
@@ -153,7 +155,7 @@ function AIAssistant() {
             ...glassCard,
             display: "flex",
             flexDirection: "column",
-            minHeight: "75vh"
+            minHeight: isPhone ? "65vh" : "75vh"
           }}
         >
           <div
@@ -207,7 +209,7 @@ function AIAssistant() {
                 key={index}
                 style={{
                   alignSelf: msg.sender === "user" ? "flex-end" : "flex-start",
-                  maxWidth: "70%",
+                  maxWidth: isPhone ? "100%" : "70%",
                   background:
                     msg.sender === "user"
                       ? "linear-gradient(90deg, #9333EA, #EC4899)"
@@ -227,6 +229,7 @@ function AIAssistant() {
             style={{
               marginTop: "16px",
               display: "flex",
+              flexDirection: isMobile ? "column" : "row",
               gap: "10px",
               alignItems: "center"
             }}
@@ -241,6 +244,7 @@ function AIAssistant() {
               }}
               style={{
                 flex: 1,
+                width: isMobile ? "100%" : "auto",
                 padding: "14px",
                 borderRadius: "16px",
                 border: "1px solid rgba(255,255,255,0.1)",
@@ -256,6 +260,7 @@ function AIAssistant() {
               style={{
                 background: "linear-gradient(90deg, #9333EA, #EC4899)",
                 border: "none",
+                width: isMobile ? "100%" : "auto",
                 padding: "14px 20px",
                 borderRadius: "16px",
                 color: "white",

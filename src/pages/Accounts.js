@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { apiRequest } from "../authService";
+import useResponsive from "../hooks/useResponsive";
 
 const formatMoney = (value) =>
   "MYR " +
@@ -9,6 +10,7 @@ const formatMoney = (value) =>
   });
 
 function Accounts() {
+  const { isMobile, isLargeMobile, isTablet, isPhone } = useResponsive();
   const [accounts, setAccounts] = useState([]);
   const [transactions, setTransactions] = useState([]);
   const [name, setName] = useState("");
@@ -115,7 +117,7 @@ function Accounts() {
 
       {error && <div style={{ ...panel, color: "#fda4af", marginBottom: 18 }}>{error}</div>}
 
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: "18px", marginBottom: "20px" }}>
+      <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : isLargeMobile ? "1fr" : isTablet ? "repeat(2, 1fr)" : "repeat(3,1fr)", gap: "18px", marginBottom: "20px" }}>
         {accounts.map((account, index) => (
           <div key={account.id} style={accountCard(colors[index % colors.length])}>
             <div>{account.account_type}</div>
@@ -142,7 +144,7 @@ function Accounts() {
         ))}
       </div>
 
-      <form onSubmit={addAccount} style={{ ...panel, marginBottom: 20, display: "grid", gridTemplateColumns: "1.4fr 1fr 1fr auto", gap: 12 }}>
+      <form onSubmit={addAccount} style={{ ...panel, marginBottom: 20, display: "grid", gridTemplateColumns: isPhone ? "1fr" : isTablet ? "1fr 1fr" : "1.4fr 1fr 1fr auto", gap: 12 }}>
         <input style={input} placeholder="Account name" value={name} onChange={(e) => setName(e.target.value)} />
         <input style={input} placeholder="Opening balance" type="number" value={balance} onChange={(e) => setBalance(e.target.value)} />
         <select style={input} value={accountType} onChange={(e) => setAccountType(e.target.value)}>
@@ -151,14 +153,14 @@ function Accounts() {
           <option>Card</option>
           <option>Savings</option>
         </select>
-        <button style={button}>Add Account</button>
+        <button style={{ ...button, width: isPhone ? "100%" : "auto" }}>Add Account</button>
       </form>
 
       <div style={panel}>
         <div style={{ fontSize: "20px", fontWeight: "800", marginBottom: "10px" }}>Recent Transactions</div>
         {transactions.length === 0 && <div style={{ opacity: 0.7 }}>No transactions yet.</div>}
         {transactions.map((item) => (
-          <div key={item.id} style={{ display: "grid", gridTemplateColumns: "48px 1fr auto", gap: "14px", alignItems: "center", padding: "16px", borderRadius: "14px", background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.04)", marginBottom: "10px" }}>
+          <div key={item.id} style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "48px 1fr auto", gap: "14px", alignItems: "center", padding: "16px", borderRadius: "14px", background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.04)", marginBottom: "10px" }}>
             <div style={{ width: 44, height: 44, borderRadius: 12, display: "flex", alignItems: "center", justifyContent: "center", background: "rgba(139,92,246,0.3)" }}>
               {item.type === "income" ? "+" : "-"}
             </div>
