@@ -26,14 +26,21 @@ const configuredOrigins = String(process.env.FRONTEND_URL || process.env.CORS_OR
   .map((origin) => origin.trim())
   .filter(Boolean);
 const allowedOrigins = [...new Set([...defaultOrigins, ...configuredOrigins])];
+const allowedOriginPatterns = [
+  /^https:\/\/[a-z0-9-]+\.vercel\.app$/i,
+];
+const isAllowedOrigin = (origin) =>
+  allowedOrigins.includes(origin) ||
+  allowedOriginPatterns.some((pattern) => pattern.test(origin));
 
 app.use(
   cors({
     origin(origin, callback) {
-      if (!origin || allowedOrigins.includes(origin)) {
+      if (!origin || isAllowedOrigin(origin)) {
         return callback(null, true);
       }
 
+      console.error(`CORS BLOCKED ORIGIN: ${origin}`);
       return callback(new Error(`Origin ${origin} is not allowed by CORS`));
     },
     credentials: true,
