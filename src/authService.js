@@ -1,12 +1,22 @@
 const normalizeBaseUrl = (value) => String(value || "").trim().replace(/\/+$/, "");
+const isBrowser = typeof window !== "undefined";
+const isLocalHost =
+  isBrowser &&
+  ["localhost", "127.0.0.1"].includes(window.location.hostname);
+const isProductionBuild = process.env.NODE_ENV === "production";
 
 const API_BASE_URL =
-  normalizeBaseUrl(process.env.REACT_APP_API_URL) || "http://localhost:5050";
+  normalizeBaseUrl(process.env.REACT_APP_API_URL) ||
+  (!isProductionBuild || isLocalHost ? "http://localhost:5050" : "");
 const API_FALLBACK_URL = normalizeBaseUrl(process.env.REACT_APP_API_FALLBACK_URL);
 
 const createConnectionError = () => {
+  const message = !API_BASE_URL && isProductionBuild
+    ? "TRACK frontend is missing its production backend URL. Set REACT_APP_API_URL in Vercel to your Render backend URL and redeploy."
+    : "Cannot reach the TRACK backend. Check that your Render backend is live, REACT_APP_API_URL points to it, and Render CORS allows your Vercel frontend URL.";
+
   const error = new Error(
-    "Cannot reach the TRACK backend. Start the backend on port 5050 and make sure PostgreSQL is running on port 5432."
+    message
   );
   error.isConnectionError = true;
   return error;
@@ -50,6 +60,10 @@ export const logoutUser = () => {
 };
 
 export const apiRequest = async (path, options = {}) => {
+  if (!API_BASE_URL) {
+    throw createConnectionError();
+  }
+
   const headers = {
     "Content-Type": "application/json",
     ...(options.headers || {}),

@@ -44,6 +44,11 @@ app.use(express.json());
 const normalizeEmail = (email) => String(email || "").trim().toLowerCase();
 const money = (value) => Number(value || 0);
 const demoNote = "demo-seed";
+const demoEmail = normalizeEmail(
+  process.env.DEMO_USER_EMAIL || "finance.demo@track.local"
+);
+const demoPassword = String(process.env.DEMO_USER_PASSWORD || "TrackDemo!2026");
+const demoName = String(process.env.DEMO_USER_NAME || "Demo User").trim();
 
 const formatDatabaseError = (err) => {
   if (!err) {
@@ -196,6 +201,35 @@ const ensureTables = async () => {
 
   await pool.query("ALTER TABLE users ADD COLUMN IF NOT EXISTS phone VARCHAR(40)");
   await pool.query("ALTER TABLE users ADD COLUMN IF NOT EXISTS plan VARCHAR(40) NOT NULL DEFAULT 'Free'");
+};
+
+const getOrCreateDemoUser = async () => {
+  if (!demoEmail || !demoPassword) {
+    return null;
+  }
+
+  const existing = await pool.query("SELECT id, email FROM users WHERE email = $1", [demoEmail]);
+  const hashedPassword = await bcrypt.hash(demoPassword, 10);
+
+  if (existing.rows[0]) {
+    const updated = await pool.query(
+      `UPDATE users
+       SET name = $1, phone = $2, password = $3, plan = COALESCE(plan, 'Free')
+       WHERE id = $4
+       RETURNING id, email`,
+      [demoName, "+60 123 456 789", hashedPassword, existing.rows[0].id]
+    );
+    return updated.rows[0];
+  }
+
+  const created = await pool.query(
+    `INSERT INTO users (name, email, password, phone, plan)
+     VALUES ($1, $2, $3, $4, 'Free')
+     RETURNING id, email`,
+    [demoName, demoEmail, hashedPassword, "+60 123 456 789"]
+  );
+
+  return created.rows[0];
 };
 
 const ensureDefaultAccounts = async (userId) => {
@@ -580,7 +614,15 @@ const seedDemoDataForUser = async (userId) => {
 };
 
 ensureTables()
-  .then(() => console.log("Database tables are ready"))
+  .then(async () => {
+    console.log("Database tables are ready");
+
+    const demoUser = await getOrCreateDemoUser();
+    if (demoUser) {
+      await seedDemoDataForUser(demoUser.id);
+      console.log(`Demo user ready: ${demoUser.email}`);
+    }
+  })
   .catch((err) => {
     console.error("DATABASE SETUP ERROR:", formatDatabaseError(err));
     if (err?.stack) {
