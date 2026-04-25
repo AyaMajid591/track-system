@@ -25,10 +25,25 @@ function Dashboard() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
+  const hasDashboardData = (result) =>
+    Boolean(
+      result?.accounts?.length ||
+        result?.recentTransactions?.length ||
+        result?.categorySummary?.length ||
+        result?.monthly?.length
+    );
+
   useEffect(() => {
     const loadDashboard = async () => {
       try {
-        const result = await apiRequest("/dashboard");
+        let result = await apiRequest("/dashboard");
+
+        // Seed a brand-new account once so the dashboard is not empty on first login.
+        if (!hasDashboardData(result)) {
+          await apiRequest("/api/demo/seed", { method: "POST" });
+          result = await apiRequest("/dashboard");
+        }
+
         setData(result);
       } catch (err) {
         setError(err.message);

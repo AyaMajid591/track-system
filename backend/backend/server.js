@@ -15,15 +15,27 @@ try {
 const app = express();
 const PORT = process.env.PORT || 5000;
 const JWT_SECRET = process.env.JWT_SECRET || "track_local_dev_secret";
+const defaultOrigins = [
+  "http://localhost:3000",
+  "http://localhost:3001",
+  "http://localhost:3002",
+  "http://localhost:3003",
+];
+const configuredOrigins = String(process.env.FRONTEND_URL || process.env.CORS_ORIGIN || "")
+  .split(",")
+  .map((origin) => origin.trim())
+  .filter(Boolean);
+const allowedOrigins = [...new Set([...defaultOrigins, ...configuredOrigins])];
 
 app.use(
   cors({
-    origin: [
-      "http://localhost:3000",
-      "http://localhost:3001",
-      "http://localhost:3002",
-      "http://localhost:3003",
-    ],
+    origin(origin, callback) {
+      if (!origin || allowedOrigins.includes(origin)) {
+        return callback(null, true);
+      }
+
+      return callback(new Error(`Origin ${origin} is not allowed by CORS`));
+    },
     credentials: true,
   })
 );
@@ -32,6 +44,34 @@ app.use(express.json());
 const normalizeEmail = (email) => String(email || "").trim().toLowerCase();
 const money = (value) => Number(value || 0);
 const demoNote = "demo-seed";
+
+const formatDatabaseError = (err) => {
+  if (!err) {
+    return "Unknown database error";
+  }
+
+  const fields = [
+    err.name,
+    err.message,
+    err.code && `code=${err.code}`,
+    err.errno && `errno=${err.errno}`,
+    err.detail && `detail=${err.detail}`,
+    err.hint && `hint=${err.hint}`,
+    err.address && `address=${err.address}`,
+    err.port && `port=${err.port}`,
+  ].filter(Boolean);
+
+  if (Array.isArray(err.errors) && err.errors.length > 0) {
+    const nested = err.errors.map((item) => formatDatabaseError(item)).join(" | ");
+    fields.push(`errors=[${nested}]`);
+  }
+
+  if (err.cause) {
+    fields.push(`cause=${formatDatabaseError(err.cause)}`);
+  }
+
+  return fields.join(" | ");
+};
 
 const createToken = (user) =>
   jwt.sign({ id: user.id, email: user.email }, JWT_SECRET, { expiresIn: "2h" });
@@ -275,13 +315,47 @@ const getFinanceContext = async (userId) => {
 };
 
 const fallbackAiReply = (message, context) => {
-  const question = String(message || "").toLowerCase();
+  const originalQuestion = String(message || "").trim();
+  const question = originalQuestion.toLowerCase();
   const topCategory = context.categorySummary[0];
   const overBudget = context.budgets.find((item) => item.spent_amount > item.limit_amount);
   const savingsRate =
     context.totalIncome > 0
       ? Math.round((context.netSavings / context.totalIncome) * 100)
       : 0;
+
+  const arithmeticExpression = originalQuestion
+    .replace(/what is|calculate|solve|=/gi, "")
+    .replace(/[?]/g, "")
+    .trim();
+
+  if (/^(hi|hello|hey|yo|sup)\b/.test(question)) {
+    return "Hi. Ask me anything. I can answer app and finance questions right now, and I can answer fully general questions once an OpenAI API key is added to the backend .env file.";
+  }
+
+  if (/(what can you do|help|how do i use|how to use)/.test(question)) {
+    return "You can ask about your TRACK spending, budgets, savings, accounts, transactions, or simple general questions. For full open-ended AI answers on any topic, add OPENAI_API_KEY to backend/backend/.env and restart the backend.";
+  }
+
+  if (/^[\d\s+\-*/().%]+$/.test(arithmeticExpression) && /[+\-*/%]/.test(arithmeticExpression)) {
+    try {
+      const result = Function(`"use strict"; return (${arithmeticExpression});`)();
+      if (Number.isFinite(result)) {
+        return `${arithmeticExpression} = ${Number(result.toFixed(8)).toString()}`;
+      }
+    } catch {
+      // Fall through to the regular assistant response.
+    }
+  }
+
+  const isFinanceQuestion =
+    /budget|spend|expense|save|saving|income|balance|transaction|money|account|category|bill|payment|finance|financial/.test(
+      question
+    );
+
+  if (!isFinanceQuestion) {
+    return "I can route any question to a real AI model, but this backend is currently running without OPENAI_API_KEY, so I only have offline app/finance/simple-math answers. Add OPENAI_API_KEY to backend/backend/.env, restart the backend, and I will answer general questions normally.";
+  }
 
   let reply = `Based on your TRACK data, your balance is MYR ${context.totalBalance.toFixed(
     2
@@ -331,8 +405,11 @@ const buildAiPrompt = (message, context) => {
     )
     .join("\n");
 
-  return `You are a smart finance assistant for a student finance manager app called TRACK.
-Use the user's real PostgreSQL finance data below. Give simple, practical advice in 3-6 short sentences.
+  return `You are Track AI, a helpful general-purpose assistant inside a student finance manager app called TRACK.
+Answer the user's question directly, even when it is not about finance.
+If the question is about the user's finances, use the PostgreSQL finance context below.
+If the question is not about finance, do not force a finance answer; answer normally.
+Keep answers clear, practical, and concise unless the user asks for detail.
 
 Balance: MYR ${context.totalBalance.toFixed(2)}
 Income: MYR ${context.totalIncome.toFixed(2)}
@@ -504,7 +581,12 @@ const seedDemoDataForUser = async (userId) => {
 
 ensureTables()
   .then(() => console.log("Database tables are ready"))
-  .catch((err) => console.error("DATABASE SETUP ERROR:", err.message));
+  .catch((err) => {
+    console.error("DATABASE SETUP ERROR:", formatDatabaseError(err));
+    if (err?.stack) {
+      console.error(err.stack);
+    }
+  });
 
 app.get("/", (req, res) => {
   res.json({ message: "TRACK backend is running" });
@@ -569,7 +651,7 @@ app.post("/login", async (req, res) => {
     console.log("LOGIN SUCCESS:", email);
     res.json({ message: "Login successful.", token: createToken(user), user: publicUser(user) });
   } catch (err) {
-    console.error("LOGIN ERROR:", err.message);
+    console.error("LOGIN ERROR:", err);
     res.status(500).json({ error: "Login failed. Please try again." });
   }
 });
@@ -1369,7 +1451,7 @@ app.get("/dashboard", authRequired, async (req, res) => {
             SUM(CASE WHEN transaction_type = 'expense' THEN amount ELSE 0 END) AS expense
      FROM transactions
      WHERE user_id = $1
-       AND transaction_date >= CURRENT_DATE - INTERVAL '13 days'
+       AND transaction_date >= CURRENT_DATE - INTERVAL '30 days'
      GROUP BY transaction_date, name
      ORDER BY transaction_date`,
     [userId]
@@ -1416,7 +1498,7 @@ app.get("/analytics", authRequired, async (req, res) => {
             SUM(CASE WHEN transaction_type = 'expense' THEN amount ELSE 0 END) AS expense
      FROM transactions
      WHERE user_id = $1
-       AND transaction_date >= CURRENT_DATE - INTERVAL '13 days'
+       AND transaction_date >= CURRENT_DATE - INTERVAL '30 days'
      GROUP BY transaction_date, name
      ORDER BY transaction_date`,
     [dashboardReq.user.id]

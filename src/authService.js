@@ -1,5 +1,16 @@
-const API_BASE_URL = process.env.REACT_APP_API_URL || "http://localhost:5000";
-const API_FALLBACK_URL = process.env.REACT_APP_API_FALLBACK_URL || "http://localhost:5050";
+const normalizeBaseUrl = (value) => String(value || "").trim().replace(/\/+$/, "");
+
+const API_BASE_URL =
+  normalizeBaseUrl(process.env.REACT_APP_API_URL) || "http://localhost:5050";
+const API_FALLBACK_URL = normalizeBaseUrl(process.env.REACT_APP_API_FALLBACK_URL);
+
+const createConnectionError = () => {
+  const error = new Error(
+    "Cannot reach the TRACK backend. Start the backend on port 5050 and make sure PostgreSQL is running on port 5432."
+  );
+  error.isConnectionError = true;
+  return error;
+};
 
 const parseResponse = async (response) => {
   const contentType = response.headers.get("content-type") || "";
@@ -55,18 +66,28 @@ export const apiRequest = async (path, options = {}) => {
   };
 
   let response;
+  let lastError;
 
   try {
     response = await fetch(`${API_BASE_URL}${path}`, requestOptions);
     return await parseResponse(response);
   } catch (err) {
+    lastError = err;
     if (!err.isHttpError && API_FALLBACK_URL && API_FALLBACK_URL !== API_BASE_URL) {
-      response = await fetch(`${API_FALLBACK_URL}${path}`, requestOptions);
-      return parseResponse(response);
+      try {
+        response = await fetch(`${API_FALLBACK_URL}${path}`, requestOptions);
+        return await parseResponse(response);
+      } catch (fallbackErr) {
+        lastError = fallbackErr;
+      }
     }
-
-    throw err;
   }
+
+  if (!lastError?.isHttpError) {
+    throw createConnectionError();
+  }
+
+  throw lastError;
 };
 
 export const loginUser = async ({ email, password }) => {

@@ -25,6 +25,7 @@ yarn-error.log*
 node_modules
 .env
 .env.*
+!.env.example
 build
 dist
 *.log

@@ -1,18 +1,15 @@
 import { Outlet } from "react-router-dom";
 import Sidebar from "./Sidebar";
+import PwaInstallButton from "./PwaInstallButton";
 
 export default function AppShell() {
   return (
     <div style={{ display: "flex", height: "100vh" }}>
-      
-      
       <Sidebar />
-
-      
       <div style={{ flex: 1, overflow: "auto", padding: "20px" }}>
         <Outlet />
       </div>
-
+      <PwaInstallButton />
     </div>
   );
 }

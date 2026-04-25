@@ -1,8 +1,8 @@
 const bcrypt = require("bcrypt");
 const pool = require("./db");
 
-const demoEmail = process.env.DEMO_USER_EMAIL || "demo@track.local";
-const demoPassword = process.env.DEMO_USER_PASSWORD || "password123";
+const demoEmail = process.env.DEMO_USER_EMAIL || "finance.demo@track.local";
+const demoPassword = process.env.DEMO_USER_PASSWORD || "TrackDemo!2026";
 const demoName = process.env.DEMO_USER_NAME || "Demo User";
 const demoNote = "demo-seed";
 
@@ -99,9 +99,11 @@ const getOrCreateDemoUser = async () => {
   ]);
 
   if (existing.rows[0]) {
-    await pool.query("UPDATE users SET name = $1, phone = $2 WHERE id = $3", [
+    const hashedPassword = await bcrypt.hash(demoPassword, 10);
+    await pool.query("UPDATE users SET name = $1, phone = $2, password = $3 WHERE id = $4", [
       demoName,
       "+60 123 456 789",
+      hashedPassword,
       existing.rows[0].id,
     ]);
     return existing.rows[0];

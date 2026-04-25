@@ -1,10 +1,15 @@
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
 import AppShell from "../components/AppShell";
+import { getCurrentUser } from "../authService";
 
 function Settings() {
   const navigate = useNavigate();
   const [pressedCard, setPressedCard] = useState("");
+  const user = getCurrentUser();
+  const fullName = user?.name || "Track User";
+  const email = user?.email || "No email saved";
+  const initial = fullName.charAt(0).toUpperCase();
 
   const pageCard = {
     background:
@@ -127,7 +132,7 @@ function Settings() {
               }}
             >
               <div style={{ opacity: 0.65, fontSize: "12px", marginBottom: "4px" }}>Full Name</div>
-              <div style={{ fontWeight: "700" }}>Aya</div>
+              <div style={{ fontWeight: "700" }}>{fullName}</div>
             </div>
 
             <div
@@ -139,7 +144,7 @@ function Settings() {
               }}
             >
               <div style={{ opacity: 0.65, fontSize: "12px", marginBottom: "4px" }}>Email</div>
-              <div style={{ fontWeight: "700" }}>ayariahi954@gmail.com</div>
+              <div style={{ fontWeight: "700" }}>{email}</div>
             </div>
 
             <div
@@ -181,11 +186,11 @@ function Settings() {
                 fontWeight: "900",
               }}
             >
-              A
+              {initial}
             </div>
 
             <div>
-              <div style={{ fontWeight: "900", fontSize: "24px", lineHeight: 1 }}>Aya</div>
+              <div style={{ fontWeight: "900", fontSize: "24px", lineHeight: 1 }}>{fullName}</div>
               <div style={{ opacity: 0.75 }}>Smart Finance Manager</div>
             </div>
           </div>

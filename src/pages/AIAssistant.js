@@ -8,7 +8,7 @@ function AIAssistant() {
   const [messages, setMessages] = useState([
     {
       sender: "ai",
-      text: "Hi! I’m your AI finance assistant in Track System. I can help you with budgeting, expense analysis, and financial advice. What would you like to know?"
+      text: "Hi! I’m Track AI. Ask me anything, or ask about your budgets, expenses, savings, and transactions."
     }
   ]);
 
@@ -121,14 +121,14 @@ function AIAssistant() {
 
           <h2 style={{ marginBottom: "8px" }}>AI Assistant</h2>
           <p style={{ opacity: 0.8, lineHeight: 1.6, fontSize: "14px" }}>
-            Ask about budgeting, savings, expenses, categories, and spending habits.
+            Ask general questions, or get personalized help with budgeting, savings, expenses, categories, and spending habits.
           </p>
 
           <div style={{ marginTop: "20px" }}>
             <div style={{ ...glassCard, marginBottom: "12px", padding: "14px" }}>
               <strong>Quick Help</strong>
               <p style={{ marginTop: "8px", opacity: 0.75, fontSize: "13px" }}>
-                Budget tips
+                Explain a topic
               </p>
             </div>
 
@@ -142,13 +142,12 @@ function AIAssistant() {
             <div style={{ ...glassCard, padding: "14px" }}>
               <strong>Quick Help</strong>
               <p style={{ marginTop: "8px", opacity: 0.75, fontSize: "13px" }}>
-                Saving advice
+                Simple calculations
               </p>
             </div>
           </div>
         </div>
 
-        {/* RIGHT CHAT PANEL */}
         <div
           style={{
             ...glassCard,
@@ -190,7 +189,7 @@ function AIAssistant() {
               </div>
             </div>
 
-            <div style={{ opacity: 0.7 }}>Smart Finance Helper</div>
+            <div style={{ opacity: 0.7 }}>General AI Helper</div>
           </div>
 
           <div
@@ -234,7 +233,7 @@ function AIAssistant() {
           >
             <input
               type="text"
-              placeholder="Ask me about finance..."
+              placeholder="Ask me anything..."
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={(e) => {

@@ -7,8 +7,8 @@ function ProfileDetails() {
 
   const [pressedBtn, setPressedBtn] = useState("");
   const [message, setMessage] = useState("");
-  const [fullName, setFullName] = useState("Aya");
-  const [email, setEmail] = useState("ayariahi954@gmail.com");
+  const [fullName, setFullName] = useState("User");
+  const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("+60 123 456 789");
   const [plan, setPlan] = useState("Free");
 
