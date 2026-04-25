@@ -1,4 +1,4 @@
-const CACHE_VERSION = "track-shell-v1";
+const CACHE_VERSION = "track-shell-v2";
 const APP_SHELL = [
   "/",
   "/index.html",
