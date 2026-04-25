@@ -1,6 +1,10 @@
+import { useEffect, useState } from "react";
 import { NavLink } from "react-router-dom";
+import { apiRequest, getCurrentUser, isLoggedIn } from "../authService";
 
 function Sidebar() {
+  const [user, setUser] = useState(() => getCurrentUser());
+
   const wrapper = {
     padding: "22px 18px",
     borderRight: "1px solid rgba(255,255,255,0.06)",
@@ -72,6 +76,56 @@ function Sidebar() {
     fontWeight: 800,
   };
 
+  useEffect(() => {
+    if (!isLoggedIn()) {
+      setUser(null);
+      return;
+    }
+
+    setUser(getCurrentUser());
+
+    let cancelled = false;
+
+    apiRequest("/profile")
+      .then((data) => {
+        if (!data?.user || cancelled) {
+          return;
+        }
+
+        const nextUser = {
+          ...getCurrentUser(),
+          ...data.user,
+        };
+
+        localStorage.setItem("track_user", JSON.stringify(nextUser));
+        setUser(nextUser);
+      })
+      .catch(() => {
+        if (!cancelled) {
+          setUser(getCurrentUser());
+        }
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const displayName =
+    String(user?.name || "").trim() ||
+    String(user?.email || "")
+      .split("@")[0]
+      .trim() ||
+    "User";
+
+  const normalizedPlan = String(user?.plan || "").trim();
+  const planLabel = normalizedPlan
+    ? normalizedPlan.toLowerCase() === "free"
+      ? "Free Plan"
+      : normalizedPlan
+    : "Account";
+  const avatarLabel = displayName.charAt(0).toUpperCase();
+
   return (
     <aside style={wrapper}>
       <div>
@@ -112,10 +166,10 @@ function Sidebar() {
       </div>
 
       <div style={userBox}>
-        <div style={avatar}>A</div>
+        <div style={avatar}>{avatarLabel}</div>
         <div>
-          <div style={{ fontWeight: 700 }}>Aya</div>
-          <div style={{ fontSize: "13px", opacity: 0.7 }}>Free Plan</div>
+          <div style={{ fontWeight: 700 }}>{displayName}</div>
+          <div style={{ fontSize: "13px", opacity: 0.7 }}>{planLabel}</div>
         </div>
       </div>
     </aside>
