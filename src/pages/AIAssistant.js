@@ -47,7 +47,11 @@ function AIAssistant() {
     background: "radial-gradient(circle at top, #8b1cf7 0%, #5b21b6 20%, #1e1b4b 55%, #0b1026 100%)",
     color: "white",
     padding: isMobile ? "16px 12px" : isLargeMobile ? "18px 14px" : isTablet ? "20px 16px" : "24px",
-    fontFamily: "Poppins, sans-serif"
+    fontFamily: "Poppins, sans-serif",
+    width: "100%",
+    maxWidth: "100%",
+    minWidth: 0,
+    overflowX: "hidden",
   };
 
   const topButton = {
@@ -74,37 +78,40 @@ function AIAssistant() {
     <div style={pageStyle}>
       <div
         style={{
-          display: "flex",
-          justifyContent: isPhone ? "flex-start" : "flex-end",
+          display: "grid",
+          gridTemplateColumns: isPhone ? "repeat(2, minmax(0, 1fr))" : "repeat(4, auto)",
+          justifyContent: isPhone ? "stretch" : "flex-end",
           gap: "10px",
-          marginBottom: "20px"
+          marginBottom: "20px",
         }}
       >
-        <button style={topButton} onClick={() => navigate("/dashboard")}>
+        <button style={{ ...topButton, width: isPhone ? "100%" : "auto", minWidth: 0, padding: isPhone ? "10px 12px" : topButton.padding }} onClick={() => navigate("/dashboard")}>
           Dashboard
         </button>
-        <button style={topButton} onClick={() => navigate("/transactions")}>
+        <button style={{ ...topButton, width: isPhone ? "100%" : "auto", minWidth: 0, padding: isPhone ? "10px 12px" : topButton.padding }} onClick={() => navigate("/transactions")}>
           Transactions
         </button>
-        <button style={topButton} onClick={() => navigate("/statistics")}>
+        <button style={{ ...topButton, width: isPhone ? "100%" : "auto", minWidth: 0, padding: isPhone ? "10px 12px" : topButton.padding }} onClick={() => navigate("/statistics")}>
           Statistics
         </button>
-        <button style={topButton} onClick={() => navigate("/profile")}>
+        <button style={{ ...topButton, width: isPhone ? "100%" : "auto", minWidth: 0, padding: isPhone ? "10px 12px" : topButton.padding }} onClick={() => navigate("/profile")}>
           Profile
         </button>
       </div>
 
       <div
         style={{
-          maxWidth: "1200px",
+          width: "100%",
+          maxWidth: isPhone ? "100%" : "1200px",
+          minWidth: 0,
           margin: "0 auto",
           display: "grid",
           gridTemplateColumns: isPhone ? "1fr" : isTablet ? "260px 1fr" : "300px 1fr",
-          gap: "20px"
+          gap: isPhone ? "14px" : "20px"
         }}
       >
         {/* LEFT PANEL */}
-        <div style={glassCard}>
+        <div style={{ ...glassCard, width: "100%", maxWidth: "100%", minWidth: 0, padding: isPhone ? "16px" : glassCard.padding }}>
           <div
             style={{
               width: "60px",
@@ -121,27 +128,27 @@ function AIAssistant() {
             🤖
           </div>
 
-          <h2 style={{ marginBottom: "8px" }}>AI Assistant</h2>
-          <p style={{ opacity: 0.8, lineHeight: 1.6, fontSize: "14px" }}>
+          <h2 style={{ marginBottom: "8px", fontSize: isPhone ? "18px" : "30px" }}>AI Assistant</h2>
+          <p style={{ opacity: 0.8, lineHeight: 1.6, fontSize: isPhone ? "13px" : "14px", margin: 0 }}>
             Ask general questions, or get personalized help with budgeting, savings, expenses, categories, and spending habits.
           </p>
 
           <div style={{ marginTop: "20px" }}>
-            <div style={{ ...glassCard, marginBottom: "12px", padding: "14px" }}>
+            <div style={{ ...glassCard, marginBottom: "12px", padding: isPhone ? "12px" : "14px", width: "100%", maxWidth: "100%", minWidth: 0 }}>
               <strong>Quick Help</strong>
               <p style={{ marginTop: "8px", opacity: 0.75, fontSize: "13px" }}>
                 Explain a topic
               </p>
             </div>
 
-            <div style={{ ...glassCard, marginBottom: "12px", padding: "14px" }}>
+            <div style={{ ...glassCard, marginBottom: "12px", padding: isPhone ? "12px" : "14px", width: "100%", maxWidth: "100%", minWidth: 0 }}>
               <strong>Quick Help</strong>
               <p style={{ marginTop: "8px", opacity: 0.75, fontSize: "13px" }}>
                 Expense analysis
               </p>
             </div>
 
-            <div style={{ ...glassCard, padding: "14px" }}>
+            <div style={{ ...glassCard, padding: isPhone ? "12px" : "14px", width: "100%", maxWidth: "100%", minWidth: 0 }}>
               <strong>Quick Help</strong>
               <p style={{ marginTop: "8px", opacity: 0.75, fontSize: "13px" }}>
                 Simple calculations
@@ -155,14 +162,20 @@ function AIAssistant() {
             ...glassCard,
             display: "flex",
             flexDirection: "column",
-            minHeight: isPhone ? "65vh" : "75vh"
+            minHeight: isPhone ? "65vh" : "75vh",
+            width: "100%",
+            maxWidth: "100%",
+            minWidth: 0,
+            padding: isPhone ? "16px" : glassCard.padding,
           }}
         >
           <div
             style={{
               display: "flex",
-              alignItems: "center",
+              flexDirection: isPhone ? "column" : "row",
+              alignItems: isPhone ? "flex-start" : "center",
               justifyContent: "space-between",
+              gap: isPhone ? "10px" : "0",
               marginBottom: "16px",
               paddingBottom: "14px",
               borderBottom: "1px solid rgba(255,255,255,0.08)"
@@ -184,14 +197,14 @@ function AIAssistant() {
                 ✨
               </div>
               <div>
-                <div style={{ fontWeight: "800", fontSize: "18px" }}>
+                <div style={{ fontWeight: "800", fontSize: isPhone ? "16px" : "18px" }}>
                   Track AI Assistant
                 </div>
                 <div style={{ color: "#7CFF9C", fontSize: "12px" }}>● Online</div>
               </div>
             </div>
 
-            <div style={{ opacity: 0.7 }}>General AI Helper</div>
+            <div style={{ opacity: 0.7, fontSize: isPhone ? "13px" : "14px" }}>General AI Helper</div>
           </div>
 
           <div
@@ -201,7 +214,8 @@ function AIAssistant() {
               display: "flex",
               flexDirection: "column",
               gap: "14px",
-              paddingRight: "6px"
+              paddingRight: isPhone ? 0 : "6px",
+              minWidth: 0,
             }}
           >
             {messages.map((msg, index) => (
